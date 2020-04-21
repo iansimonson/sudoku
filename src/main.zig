@@ -35,11 +35,11 @@ pub fn main() !void {
     var keyboardActions = makeKeyMap();
 
     var e: sdl.Event = undefined;
-    outer: while (true) {
+    while (true) {
         if (sdl.waitEvent(&e) != 0) {
             switch (e.@"type") {
                 sdl.QUIT => {
-                    break :outer;
+                    break;
                 },
                 sdl.KEYDOWN => {
                     const idx = @intCast(usize, @enumToInt(e.key.keysym.scancode));
