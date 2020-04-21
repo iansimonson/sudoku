@@ -245,6 +245,7 @@ const WorldData = struct {
 
         for (self.grid.grid) |cell| {
             try sdl.renderDrawRect(self.renderer, &cell.draw_position);
+            // Draw the big number if it's been placed
             if (cell.current_value) |value| {
                 const cv_expand: i32 = value;
                 const number_src = sdl.Rect{ .x = (cv_expand - 1) * 42, .y = 0, .w = 42, .h = 42 };
@@ -261,41 +262,30 @@ const WorldData = struct {
                     &number_draw_pos,
                 );
             } else {
-                const center_count = blk: {
-                    var count: usize = 0;
-                    for (cell.center) |b| {
-                        if (b) {
-                            count += 1;
-                        }
-                    }
-                    break :blk count;
-                };
+                // draw any of the little numbers we've annotated
+                var printed_values: i32 = 0;
+                var start_y: i32 = 7;
+                const start_x: i32 = 3;
+                for (cell.center) |b, idx| {
+                    if (b) {
+                        const number_src = sdl.Rect{ .x = @intCast(i32, idx) * 42, .y = 0, .w = 42, .h = 42 };
+                        const small_number_draw = sdl.Rect{
+                            .x = cell.draw_position.x + start_x + 7 * printed_values,
+                            .y = cell.draw_position.y + start_y,
+                            .w = 7,
+                            .h = 10,
+                        };
+                        try sdl.renderCopy(
+                            self.renderer,
+                            self.numbers,
+                            &number_src,
+                            &small_number_draw,
+                        );
 
-                if (center_count > 0) {
-                    var printed_values: i32 = 0;
-                    var start_y: i32 = 7;
-                    const start_x: i32 = 3;
-                    for (cell.center) |b, idx| {
-                        if (b) {
-                            const number_src = sdl.Rect{ .x = @intCast(i32, idx) * 42, .y = 0, .w = 42, .h = 42 };
-                            const small_number_draw = sdl.Rect{
-                                .x = cell.draw_position.x + start_x + 7 * printed_values,
-                                .y = cell.draw_position.y + start_y,
-                                .w = 7,
-                                .h = 10,
-                            };
-                            try sdl.renderCopy(
-                                self.renderer,
-                                self.numbers,
-                                &number_src,
-                                &small_number_draw,
-                            );
-
-                            printed_values += 1;
-                            if (printed_values == 5) {
-                                start_y = 22;
-                                printed_values = 0;
-                            }
+                        printed_values += 1;
+                        if (printed_values == 5) {
+                            start_y = 22;
+                            printed_values = 0;
                         }
                     }
                 }
