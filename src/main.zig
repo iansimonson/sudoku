@@ -1,5 +1,7 @@
 const std = @import("std");
-usingnamespace @import("sdl");
+const sdl_libraries = @import("sdl");
+const sdl = sdl_libraries.sdl;
+const sdl_img = sdl_libraries.sdl_img;
 
 const Allocator = std.mem.Allocator;
 
