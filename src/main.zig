@@ -32,34 +32,22 @@ pub fn main() !void {
     var world = try WorldData.init(alloc);
     defer world.deinit();
 
-    const window = world.window;
-    const renderer = world.renderer;
-    const grid = &world.grid;
-
     var keyboardActions = makeKeyMap();
 
-    try sdl.setRenderDrawColor(renderer, sdl.WHITE);
-
-    var running = true;
-    var changed = true;
-    var key_down = false;
     var e: sdl.Event = undefined;
-    while (running) {
+    outer: while (true) {
         if (sdl.waitEvent(&e) != 0) {
-            if (e.@"type" == sdl.QUIT) {
-                running = false;
+            switch (e.@"type") {
+                sdl.QUIT => {
+                    break :outer;
+                },
+                sdl.KEYDOWN => {
+                    const idx = @intCast(usize, @enumToInt(e.key.keysym.scancode));
+                    keyboardActions[idx].call(&world);
+                    try world.render();
+                },
+                else => {},
             }
-
-            if (e.@"type" == sdl.KEYDOWN) {
-                const idx = @intCast(usize, @enumToInt(e.key.keysym.scancode));
-                keyboardActions[idx].call(&world);
-                changed = true;
-            }
-        }
-
-        if (changed) {
-            try world.render();
-            changed = false;
         }
     }
 }
@@ -79,14 +67,14 @@ fn deinitSdl() void {
 }
 
 fn load(renderer: *sdl.Renderer, file_name: []const u8) !*sdl.Texture {
-    var surface_opt = sdl_img.load(file_name.ptr);
+    const surface_opt = sdl_img.load(file_name.ptr);
     if (surface_opt == null) {
         sdl_img.handleError("Error loading asset as surface");
         return error.SurfaceLoadError;
     }
     defer sdl.freeSurface(surface_opt.?);
 
-    var texture_opt = sdl.createTextureFromSurface(renderer, surface_opt.?);
+    const texture_opt = sdl.createTextureFromSurface(renderer, surface_opt.?);
     if (texture_opt == null) {
         sdl_img.handleError("Error converting surface to texture");
         return error.TextureCreationError;
@@ -286,7 +274,7 @@ const WorldData = struct {
                 if (center_count > 0) {
                     var printed_values: i32 = 0;
                     var start_y: i32 = 7;
-                    var start_x: i32 = 3;
+                    const start_x: i32 = 3;
                     for (cell.center) |b, idx| {
                         if (b) {
                             const number_src = sdl.Rect{ .x = @intCast(i32, idx) * 42, .y = 0, .w = 42, .h = 42 };
