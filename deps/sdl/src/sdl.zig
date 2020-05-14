@@ -9,6 +9,7 @@ pub const Texture = c.SDL_Texture;
 pub const Rect = c.SDL_Rect;
 pub const Event = c.SDL_Event;
 pub const RendererFlip = c.SDL_RendererFlip;
+pub const Color = c.SDL_Color;
 
 // Function Forwards
 pub const init = c.SDL_Init;
@@ -23,6 +24,7 @@ pub const destroyWindow = c.SDL_DestroyWindow;
 pub const destroyRenderer = c.SDL_DestroyRenderer;
 pub const renderCopyEx = c.SDL_RenderCopyEx;
 pub const renderDrawRects = c.SDL_RenderDrawRects;
+pub const renderSetLogicalSize = c.SDL_RenderSetLogicalSize;
 pub const loadBmp = c.SDL_LoadBMP;
 pub const freeSurface = c.SDL_FreeSurface;
 pub const createTextureFromSurface = c.SDL_CreateTextureFromSurface;
@@ -174,12 +176,12 @@ pub fn renderFillRect(renderer: *Renderer, rect: *const Rect) !void {
 }
 
 // Useful struct for setting color
-pub const Color = struct {
-    r: u8,
-    g: u8,
-    b: u8,
-    a: u8,
-};
+//pub const Color = struct {
+//    r: u8,
+//    g: u8,
+//    b: u8,
+//    a: u8,
+//};
 
 pub const BLACK = Color{
     .r = 0,

@@ -20,8 +20,8 @@ const selected_color = sdl.Color{
 };
 
 pub fn main() !void {
-    try initSdl();
-    defer deinitSdl();
+    try initAll();
+    defer deinitAll();
 
     // the only thing that allocates (other than SDL in libc) is an ArrayList
     // which won't get above 81 elements
@@ -44,15 +44,15 @@ pub fn main() !void {
                 sdl.KEYDOWN => {
                     const idx = @intCast(usize, @enumToInt(e.key.keysym.scancode));
                     keyboardActions[idx].call(&world);
-                    try world.render();
                 },
                 else => {},
             }
+            try world.render();
         }
     }
 }
 
-fn initSdl() !void {
+fn initAll() !void {
     if (sdl.init(sdl.INIT_VIDEO) < 0) {
         return error.SDL_INIT_ERROR;
     }
@@ -61,7 +61,7 @@ fn initSdl() !void {
     }
 }
 
-fn deinitSdl() void {
+fn deinitAll() void {
     _ = sdl_img.quit();
     _ = sdl.quit();
 }
@@ -196,11 +196,13 @@ const WorldData = struct {
             "Sudoku",
             sdl.WINDOWPOS_CENTERED,
             sdl.WINDOWPOS_CENTERED,
-            640,
-            480,
+            1280,
+            720,
             .{sdl.WINDOW_SHOWN},
         );
         const renderer = try sdl.createRenderer(window, -1, .{});
+        _ = sdl.renderSetLogicalSize(renderer, 640, 480);
+
         const big_numbers_texture = try load(renderer, "assets/big_numbers.png");
         var grid = generateGrid();
         var selected = try std.ArrayList(Point).initCapacity(alloc, grid.grid.len);
@@ -249,6 +251,7 @@ const WorldData = struct {
             if (cell.current_value) |value| {
                 const cv_expand: i32 = value;
                 const number_src = sdl.Rect{ .x = (cv_expand - 1) * 42, .y = 0, .w = 42, .h = 42 };
+                //const number_src = sdl.Rect{ .x = 0, .y = 0, .w = 42, .h = 42 };
                 const number_draw_pos = sdl.Rect{
                     .x = cell.draw_position.x + 2,
                     .y = cell.draw_position.y + 2,
